@@ -1,13 +1,12 @@
 ######################################################
 # List-en creates public playlists based on monthly 
-# top posts in musica subreddits
+# top posts in musical subreddits
 #
 ######################################################
-import praw
 import sys
-
-import pprint
-
+#Reddit wrapper
+import praw
+#Spotify wrapper
 import spotipy
 import spotipy.util as util
 
@@ -38,12 +37,8 @@ try:
 except praw.errors.InvalidSubreddit:
     sys.exit("Invalid subreddit!")
 
-#List of sites we want to see
-#If using to create a playlist in Rdio/Spotify etc should probably remove everything but youtube
+#List of sites likely to have songs on spotify
 acceptable_sites = ("youtube","soundcloud", "bandcamp")
-
-#This if for music discovery. List of bands to avoid
-avoid = ("mogwai", "eits", "twdy", "godspeed", "sigur")
 
 #track to add
 tracks = []
@@ -74,15 +69,13 @@ if not playlist_id:
 for x in submissions:
     #Convert to a string so we can compare it to the filters above
     str(x)
-    #If it's not a band to avoid
-    if not any(s in x.title.lower() for s in avoid):
-        #And is from an acceptable site
-        if any(s in x.url.lower() for s in acceptable_sites):
-            #Search for it
-            results = sp.search(x.title, 1)
-            for i, t in enumerate(results['tracks']['items']):
-                #add it to the list of tracks to add
-                tracks.append(t['id'])                          
+    #If it's from an acceptable site
+    if any(s in x.url.lower() for s in acceptable_sites):
+        #Search for it
+        results = sp.search(x.title, 1)
+        for i, t in enumerate(results['tracks']['items']):
+            #add it to the list of tracks to add
+            tracks.append(t['id'])                                  
 
 #Add the tracks
 sp.user_playlist_replace_tracks(username, playlist_id, tracks)
